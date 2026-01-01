@@ -1,0 +1,7 @@
+Invoice Number: INV-2026-001
+Date: January 1, 2026
+From: Acme Corp
+To: John Doe
+Total Due: $150.00
+Description: Consulting Services for January 2026.
+Please pay within 30 days.

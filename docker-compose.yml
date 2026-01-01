@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: butler-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - butler-network
+
+  init-ollama:
+    image: ollama/ollama:latest
+    container_name: butler-init-ollama
+    depends_on:
+      - ollama
+    networks:
+      - butler-network
+    entrypoint: /bin/sh
+    command: "-c 'sleep 5; OLLAMA_HOST=ollama:11434 ollama pull gemma3:1b'"
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: butler-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BLOCK_FS_WRITE_ACCESS=false
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./my-local-files:/files
+    depends_on:
+      - ollama
+    networks:
+      - butler-network
+
+networks:
+  butler-network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+  ollama_data:

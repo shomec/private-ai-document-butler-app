@@ -1,0 +1,134 @@
+{
+    "name": "Private AI Document Butler",
+    "nodes": [
+        {
+            "parameters": {
+                "triggerOn": "folder",
+                "path": "/files/inbox",
+                "events": [
+                    "add"
+                ],
+                "options": {
+                    "awaitWriteFinish": true
+                }
+            },
+            "id": "1d8b76c5-7f3c-4b8c-8f9c-7d9a8b7c6d5e",
+            "name": "Local File Trigger",
+            "type": "n8n-nodes-base.localFileTrigger",
+            "typeVersion": 1,
+            "position": [
+                400,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fileKey": "={{$json.path}}"
+            },
+            "id": "2e8c76d5-8f4b-4c9d-9f0a-8d9b8c7d6e5f",
+            "name": "Read Binary File",
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "pdf",
+                "binaryPropertyName": "data"
+            },
+            "id": "3f9d86e5-9f5c-4d0e-af1b-9e0c9d8e7f60",
+            "name": "Extract From File",
+            "type": "n8n-nodes-base.extractFromFile",
+            "typeVersion": 1,
+            "position": [
+                800,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "gemma3:1b",
+                "prompt": "=Analyze the following text and return ONLY one word that represents its category: Invoice, Personal, or Technical. If you aren't sure, return 'Other'. Text: {{$json.text}}",
+                "options": {
+                    "baseUrl": "http://ollama:11434"
+                }
+            },
+            "id": "4a0e97f5-af6d-4e1f-bf2c-ae1d0e9f8071",
+            "name": "Ollama Node",
+            "type": "n8n-nodes-base.ollamaChatModel",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "move",
+                "fileName": "={{$node[\"Read Binary File\"].json.path}}",
+                "destinationPath": "=/files/organized/{{$json.message.content}}/{{$node[\"Read Binary File\"].json.fileName}}"
+            },
+            "id": "5b1f08a6-bf7e-4f2g-cf3d-bf2e1f0g9182",
+            "name": "Move Binary File",
+            "type": "n8n-nodes-base.moveBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                1200,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Local File Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Read Binary File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Binary File": {
+            "main": [
+                [
+                    {
+                        "node": "Extract From File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract From File": {
+            "main": [
+                [
+                    {
+                        "node": "Ollama Node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ollama Node": {
+            "main": [
+                [
+                    {
+                        "node": "Move Binary File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1"
+    }
+}
