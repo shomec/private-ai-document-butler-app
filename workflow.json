@@ -23,7 +23,7 @@
         },
         {
             "parameters": {
-                "fileKey": "={{$json.path}}"
+                "filePath": "={{$json.path}}"
             },
             "id": "2e8c76d5-8f4b-4c9d-9f0a-8d9b8c7d6e5f",
             "name": "Read Binary File",
@@ -68,7 +68,7 @@
         {
             "parameters": {
                 "operation": "move",
-                "fileName": "={{$node[\"Read Binary File\"].json.path}}",
+                "sourceFilePath": "={{$node[\"Read Binary File\"].json.path}}",
                 "destinationPath": "=/files/organized/{{$json.message.content}}/{{$node[\"Read Binary File\"].json.fileName}}"
             },
             "id": "5b1f08a6-bf7e-4f2g-cf3d-bf2e1f0g9182",
