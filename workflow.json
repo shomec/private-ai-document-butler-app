@@ -4,7 +4,7 @@
         {
             "parameters": {
                 "triggerOn": "folder",
-                "path": "/files/inbox",
+                "folderToWatch": "/files/inbox",
                 "events": [
                     "add"
                 ],
@@ -15,7 +15,7 @@
             "id": "1d8b76c5-7f3c-4b8c-8f9c-7d9a8b7c6d5e",
             "name": "Local File Trigger",
             "type": "n8n-nodes-base.localFileTrigger",
-            "typeVersion": 1,
+            "typeVersion": 2,
             "position": [
                 400,
                 300
@@ -50,15 +50,11 @@
         },
         {
             "parameters": {
-                "model": "gemma3:1b",
-                "prompt": "=Analyze the following text and return ONLY one word that represents its category: Invoice, Personal, or Technical. If you aren't sure, return 'Other'. Text: {{$json.text}}",
-                "options": {
-                    "baseUrl": "http://ollama:11434"
-                }
+                "prompt": "=Analyze the following text and return ONLY one word that represents its category: Invoice, Personal, or Technical. If you aren't sure, return 'Other'. Text: {{$json.text}}"
             },
-            "id": "4a0e97f5-af6d-4e1f-bf2c-ae1d0e9f8071",
-            "name": "Ollama Node",
-            "type": "n8n-nodes-base.ollamaChatModel",
+            "id": "6c2d8e9f-7a4b-4c0d-9e1f-8a9b0c1d2e3f",
+            "name": "Basic LLM Chain",
+            "type": "n8n-nodes-langchain.chainLlm",
             "typeVersion": 1,
             "position": [
                 1000,
@@ -67,13 +63,29 @@
         },
         {
             "parameters": {
-                "operation": "move",
+                "model": "gemma3:1b",
+                "options": {
+                    "baseUrl": "http://ollama:11434"
+                }
+            },
+            "id": "4a0e97f5-af6d-4e1f-bf2c-ae1d0e9f8071",
+            "name": "Ollama Node",
+            "type": "n8n-nodes-langchain.chatModelOllama",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "rename",
                 "sourceFilePath": "={{$node[\"Read Binary File\"].json.path}}",
-                "destinationPath": "=/files/organized/{{$json.message.content}}/{{$node[\"Read Binary File\"].json.fileName}}"
+                "destinationFilePath": "=/files/organized/{{$json.message.content}}/{{$node[\"Read Binary File\"].json.fileName}}"
             },
             "id": "5b1f08a6-bf7e-4f2g-cf3d-bf2e1f0g9182",
             "name": "Move Binary File",
-            "type": "n8n-nodes-base.moveBinaryFile",
+            "type": "n8n-nodes-base.readWriteFile",
             "typeVersion": 1,
             "position": [
                 1200,
@@ -108,14 +120,14 @@
             "main": [
                 [
                     {
-                        "node": "Ollama Node",
+                        "node": "Basic LLM Chain",
                         "type": "main",
                         "index": 0
                     }
                 ]
             ]
         },
-        "Ollama Node": {
+        "Basic LLM Chain": {
             "main": [
                 [
                     {
@@ -125,9 +137,20 @@
                     }
                 ]
             ]
+        },
+        "Ollama Node": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Basic LLM Chain",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
         }
     },
-    "active": true,
+    "active": false,
     "settings": {
         "executionOrder": "v1"
     }
